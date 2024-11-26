@@ -21,6 +21,7 @@ public final class Money implements Comparable<Money>, Serializable {
     public static final Money ZERO = new Money(0L);
 
     private static final int DEFAULT_SCALE = 2;
+    private static final int ZERO_SCALE = 0;
     private static final RoundingMode DEFAULT_ROUNDING_MODE = HALF_UP;
     private static final NumberFormat DEFAULT_CURRENCY_FORMAT = NumberFormat.getCurrencyInstance(Locale.US);
     private static final NumberFormat DEFAULT_FORMAT = NumberFormat.getInstance(Locale.US);
@@ -55,7 +56,7 @@ public final class Money implements Comparable<Money>, Serializable {
 
     public static Money ofDecimal(BigDecimal decimal) {
         return create(decimal.setScale(DEFAULT_SCALE, DEFAULT_ROUNDING_MODE)
-                .movePointRight(DEFAULT_SCALE).longValue());
+                .movePointRight(DEFAULT_SCALE).longValueExact());
     }
 
     public static Money ofCents(int cents) {
@@ -76,6 +77,10 @@ public final class Money implements Comparable<Money>, Serializable {
 
     private BigDecimal toBigDecimalCents() {
         return BigDecimal.valueOf(this.cents, DEFAULT_SCALE);
+    }
+
+    private BigDecimal toBigDecimal() {
+        return BigDecimal.valueOf(this.cents);
     }
 
     public long getCents() {
@@ -108,28 +113,40 @@ public final class Money implements Comparable<Money>, Serializable {
         if (money.cents == 0L) {
             return ZERO;
         }
-        return money.cents == 1L ? this : ofDecimal(this.toBigDecimalCents().multiply(money.toBigDecimalCents()));
+        return money.cents == 1L ? this : ofCents(this.toBigDecimal().multiply(money.toBigDecimalCents())
+                                            .setScale(ZERO_SCALE, DEFAULT_ROUNDING_MODE).longValueExact());
     }
 
     public Money multipliedBy(long multiplicand) {
         if (multiplicand == 0L) {
             return ZERO;
         }
-        return multiplicand == 1L ? this : ofDecimal(this.toBigDecimalCents().multiply(BigDecimal.valueOf(multiplicand)));
+        return multiplicand == 1L ? this : ofCents(this.toBigDecimal().multiply(BigDecimal.valueOf(multiplicand))
+                                                .setScale(ZERO_SCALE, DEFAULT_ROUNDING_MODE).longValueExact());
+    }
+
+    public Money multipliedBy(BigDecimal multiplicand) {
+        if (BigDecimal.ZERO.equals(multiplicand)) {
+            return ZERO;
+        }
+        return BigDecimal.ONE.equals(multiplicand) ? this : ofCents(this.toBigDecimal().multiply(multiplicand)
+                                                        .setScale(ZERO_SCALE, DEFAULT_ROUNDING_MODE).longValueExact());
     }
 
     public Money dividedBy(Money money) {
         if (money.cents == 0L) {
             throw new ArithmeticException("Cannot divide by zero");
         }
-        return money.cents == 100L ? this: ofDecimal(this.toBigDecimalCents().divide(money.toBigDecimalCents(), DEFAULT_ROUNDING_MODE));
+        return money.cents == 100L ? this: ofCents(this.toBigDecimal().divide(money.toBigDecimalCents(), ZERO_SCALE, DEFAULT_ROUNDING_MODE)
+                                                .longValueExact());
     }
 
     public Money dividedBy(long divisor) {
         if (divisor == 0L) {
             throw new ArithmeticException("Cannot divide by zero");
         }
-        return divisor == 1L ? this : ofDecimal(this.toBigDecimalCents().divide(BigDecimal.valueOf(divisor), DEFAULT_ROUNDING_MODE));
+        return divisor == 1L ? this : ofCents(this.toBigDecimal().divide(BigDecimal.valueOf(divisor), ZERO_SCALE, DEFAULT_ROUNDING_MODE)
+                                                .longValueExact());
     }
 
     public static Money total(double... monies) {

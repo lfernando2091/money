@@ -166,6 +166,16 @@ class MoneyTest {
         money1 = Money.ofCents(3);
         money3 = money1.multipliedBy(2);
         assertEquals(6, money3.getCents());
+
+        money3 = money1.multipliedBy(BigDecimal.valueOf(2));
+        assertEquals(6, money3.getCents());
+
+        money3 = money1.multipliedBy(BigDecimal.valueOf(2.456));
+        assertEquals(7, money3.getCents());
+
+        money1 = Money.ofDecimal(3);
+        money3 = money1.multipliedBy(BigDecimal.valueOf(2.456));
+        assertEquals(737, money3.getCents());
     }
 
     @Test
