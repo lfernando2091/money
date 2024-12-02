@@ -53,7 +53,7 @@ class MoneyTest {
         assertEquals(0, money.getCents());
 
         money = Money.ofDecimal(0.005);
-        assertEquals(1, money.getCents());
+        assertEquals(0, money.getCents());
     }
 
     @Test
@@ -176,6 +176,10 @@ class MoneyTest {
         money1 = Money.ofDecimal(3);
         money3 = money1.multipliedBy(BigDecimal.valueOf(2.456));
         assertEquals(737, money3.getCents());
+
+        money1 = Money.ofDecimal(3.678);
+        money3 = money1.multipliedBy(BigDecimal.valueOf(2.456));
+        assertEquals(904, money3.getCents());
     }
 
     @Test
@@ -198,6 +202,14 @@ class MoneyTest {
         money1 = Money.ofCents(300);
         money3 = money1.dividedBy(2);
         assertEquals(150, money3.getCents());
+
+        money1 = Money.ofDecimal(3);
+        money3 = money1.dividedBy(BigDecimal.valueOf(3.756));
+        assertEquals(80, money3.getCents());
+
+        money1 = Money.ofDecimal(3.678);
+        money3 = money1.dividedBy(BigDecimal.valueOf(3.756));
+        assertEquals(98, money3.getCents());
     }
 
     @Test
@@ -243,11 +255,11 @@ class MoneyTest {
     @Test
     void verify_compareTo_methods() {
         Money money = Money.ofDecimal(100.445);
-        assertEquals(TRUE, money.isEqual(Money.ofCents(10045)));
+        assertEquals(TRUE, money.isEqual(Money.ofCents(10044)));
 
-        assertEquals(TRUE, money.isGreaterThan(Money.ofCents(10044)));
+        assertEquals(TRUE, money.isGreaterThan(Money.ofCents(10043)));
         assertEquals(TRUE, money.isGreaterThanOrEqual(Money.ofCents(10044)));
-        assertEquals(TRUE, money.isGreaterThanOrEqual(Money.ofCents(10045)));
+        assertEquals(TRUE, money.isGreaterThanOrEqual(Money.ofCents(10043)));
 
         assertEquals(TRUE, money.isLessThan(Money.ofCents(10046)));
         assertEquals(TRUE, money.isLessThanOrEqual(Money.ofCents(10046)));

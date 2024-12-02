@@ -11,7 +11,7 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.stream.StreamSupport;
 
-import static java.math.RoundingMode.HALF_UP;
+import static java.math.RoundingMode.HALF_EVEN;
 
 public final class Money implements Comparable<Money>, Serializable {
 
@@ -22,7 +22,7 @@ public final class Money implements Comparable<Money>, Serializable {
 
     private static final int DEFAULT_SCALE = 2;
     private static final int ZERO_SCALE = 0;
-    private static final RoundingMode DEFAULT_ROUNDING_MODE = HALF_UP;
+    private static final RoundingMode DEFAULT_ROUNDING_MODE = HALF_EVEN;
     private static final NumberFormat DEFAULT_CURRENCY_FORMAT = NumberFormat.getCurrencyInstance(Locale.US);
     private static final NumberFormat DEFAULT_FORMAT = NumberFormat.getInstance(Locale.US);
 
@@ -147,6 +147,14 @@ public final class Money implements Comparable<Money>, Serializable {
         }
         return divisor == 1L ? this : ofCents(this.toBigDecimal().divide(BigDecimal.valueOf(divisor), ZERO_SCALE, DEFAULT_ROUNDING_MODE)
                                                 .longValueExact());
+    }
+
+    public Money dividedBy(BigDecimal divisor) {
+        if (BigDecimal.ZERO.equals(divisor)) {
+            throw new ArithmeticException("Cannot divide by zero");
+        }
+        return BigDecimal.ONE.equals(divisor) ? this : ofCents(this.toBigDecimal().divide(divisor, ZERO_SCALE, DEFAULT_ROUNDING_MODE)
+                .longValueExact());
     }
 
     public static Money total(double... monies) {
